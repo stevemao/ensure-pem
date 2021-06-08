@@ -1,7 +1,10 @@
 import ensurePem from "..";
+import crypto from "crypto";
 
-test("correct key", () => {
-  const key = `-----BEGIN RSA PRIVATE KEY-----
+test("encrypt and decrypt should work", () => {
+  const data = "foo-bar";
+
+  const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgGkXLhQjd8uhPO8W61NUHd+JoeXFM0II9IW3AwiJzq4MSk2Hy/+H
 PeYxgIBON2WfsVHd6P+rQM63SUclUy4M0UdjB9gZK+3o5VnFvWGGM0rLExZuaU71
 zBF/Vi+ISGR/4WDQY9gk1y6rslZpKKjCrNiRTMB7hcIjQQ6bD+CTNUkXAgMBAAEC
@@ -17,15 +20,25 @@ zgSz3kNhPuphQ7WZaMNCunIs0F5g7oG+DItCap8or0gGsjtmjVcuO5sgHsv+0sS1
 bop8AAc6325RpF4FiY0K5C8SJ/Lx9cZxpB2otbC9bA==
 -----END RSA PRIVATE KEY-----`;
 
-  expect(ensurePem(key)).toEqual(key);
-});
+  const publicKey = `-----BEGIN PUBLIC KEY-----MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGkXLhQjd8uhPO8W61NUHd+JoeXFM0II9IW3AwiJzq4MSk2Hy/+HPeYxgIBON2WfsVHd6P+rQM63SUclUy4M0UdjB9gZK+3o5VnFvWGGM0rLExZuaU71zBF/Vi+ISGR/4WDQY9gk1y6rslZpKKjCrNiRTMB7hcIjQQ6bD+CTNUkXAgMBAAE=-----END PUBLIC KEY-----`;
 
-test("oneliner key", () => {
-  const oneliner = `-----BEGIN PUBLIC KEY-----MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGkXLhQjd8uhPO8W61NUHd+JoeXFM0II9IW3AwiJzq4MSk2Hy/+HPeYxgIBON2WfsVHd6P+rQM63SUclUy4M0UdjB9gZK+3o5VnFvWGGM0rLExZuaU71zBF/Vi+ISGR/4WDQY9gk1y6rslZpKKjCrNiRTMB7hcIjQQ6bD+CTNUkXAgMBAAE=-----END PUBLIC KEY-----`;
+  const encrypted = crypto.publicEncrypt(
+    {
+      key: ensurePem(publicKey),
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+    },
+    Buffer.from(data, "utf8")
+  );
 
-  const key = `-----BEGIN PUBLIC KEY-----
-MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGkXLhQjd8uhPO8W61NUHd+JoeXFM0II9IW3AwiJzq4MSk2Hy/+HPeYxgIBON2WfsVHd6P+rQM63SUclUy4M0UdjB9gZK+3o5VnFvWGGM0rLExZuaU71zBF/Vi+ISGR/4WDQY9gk1y6rslZpKKjCrNiRTMB7hcIjQQ6bD+CTNUkXAgMBAAE=
------END PUBLIC KEY-----`;
+  const decrypted = crypto
+    .privateDecrypt(
+      {
+        key: ensurePem(privateKey),
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      encrypted
+    )
+    .toString("utf8");
 
-  expect(ensurePem(oneliner)).toEqual(key);
+  expect(decrypted).toEqual(data);
 });

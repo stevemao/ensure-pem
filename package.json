@@ -10,7 +10,7 @@
     "test": "jest",
     "clean": "rm -rf lib",
     "build": "tsc",
-    "prepare": "npm run clean && npm run build"
+    "prepare": "husky install && npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -35,11 +35,6 @@
     "ts-jest": "^26.5.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "*.{ts,css,md}": "prettier --write"
